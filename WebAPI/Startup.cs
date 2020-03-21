@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -96,13 +97,20 @@ namespace WebAPI
                 {
                     ctx.Response.ContentLength = 0;
                 }
+                else if ( ctx.Response.StatusCode == 404 && !Path.HasExtension(ctx.Request.Path.Value))
+                {
+                    ctx.Request.Path = "/index.html";
+                    await next();
+                }
+
             });
 
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
             app.UseCors( builder =>
             builder.WithOrigins(Configuration["ApplicationSettings:Client_URL"].ToString())
             .AllowAnyHeader()
